@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: freshcart
+    env: docker
+    autoDeploy: true
+    plan: free
+    healthCheckPath: /login
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3000
+      - key: JWT_SECRET
+        sync: false
+      - key: NEXT_PUBLIC_APP_URL
+        sync: false

@@ -97,6 +97,26 @@ Recommended free options:
 - Railway
 - Render
 
+### Fastest Path: Render Blueprint + Docker
+
+This repository now includes:
+- render.yaml
+- Dockerfile
+
+Deploy steps:
+1. Push to GitHub.
+2. In Render, choose New + and select Blueprint.
+3. Pick this repository and apply the blueprint.
+4. Set secret env vars in Render:
+- JWT_SECRET
+- NEXT_PUBLIC_APP_URL (your public Render URL)
+5. Deploy.
+
+Why this path is reliable:
+- It uses Node 20 in Docker explicitly.
+- It runs your custom Node server (server.js) and Socket.IO exactly the same as local.
+- It avoids host runtime drift from auto-detected buildpacks.
+
 ### Option 1: Deploy on Railway (recommended)
 
 1. Push this project to a GitHub repository.
