@@ -1,8 +1,8 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { Suspense, useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 
-export default function LoginPage() {
+function LoginContent() {
   const params = useSearchParams();
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -97,5 +97,13 @@ export default function LoginPage() {
         <p className="text-center text-[#2D5A3F] text-xs mt-6">Your mobile number is your unique login ID.</p>
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-[#0D2B1F] flex items-center justify-center p-4 text-[#4B7A5B]">Loading…</div>}>
+      <LoginContent />
+    </Suspense>
   );
 }

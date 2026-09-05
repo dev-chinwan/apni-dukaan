@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect, useCallback } from 'react';
+import { Suspense, useState, useEffect, useCallback } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useSocket } from '@/hooks/useSocket';
 import { StatusBadge } from '@/components/ui/StatusBadge';
@@ -7,7 +7,7 @@ import { OrderTracker } from '@/components/ui/OrderTracker';
 import { STATUS_STEPS, STATUS_TRANSITIONS } from '@/config/products.config';
 import { toast } from '@/components/ui/Toast';
 
-export default function AdminOrdersPage() {
+function AdminOrdersContent() {
   const searchParams = useSearchParams();
   const [orders, setOrders]   = useState([]);
   const [loading, setLoading] = useState(true);
@@ -205,5 +205,13 @@ export default function AdminOrdersPage() {
         ))}
       </div>
     </div>
+  );
+}
+
+export default function AdminOrdersPage() {
+  return (
+    <Suspense fallback={<div className="text-[#4B7A5B] text-sm py-8 text-center">Loading orders…</div>}>
+      <AdminOrdersContent />
+    </Suspense>
   );
 }
