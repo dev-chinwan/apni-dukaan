@@ -1,0 +1,35 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  *, *::before, *::after { box-sizing: border-box; }
+  body { background: #0D2B1F; color: #E8F5E9; font-family: 'Inter', sans-serif; min-height: 100vh; }
+  ::-webkit-scrollbar { width: 4px; height: 4px; }
+  ::-webkit-scrollbar-track { background: #0A2318; }
+  ::-webkit-scrollbar-thumb { background: #2D5A3F; border-radius: 2px; }
+}
+
+@layer components {
+  .card    { @apply bg-[#0A2318] border border-[#1A3D2B] rounded-2xl; }
+  .input   { @apply w-full px-4 py-3 rounded-xl bg-[#0A2318] border border-[#1A3D2B] text-green-50 placeholder-[#4B7A5B] outline-none focus:border-leaf-500/50 transition-colors text-sm; }
+  .btn-primary { @apply w-full py-3 px-6 rounded-xl bg-leaf-500 hover:bg-leaf-600 text-[#061810] font-bold font-grotesk transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed; }
+  .btn-ghost   { @apply px-4 py-2 rounded-lg border border-[#1A3D2B] text-[#4B7A5B] hover:text-green-300 hover:border-leaf-500/30 transition-all text-sm; }
+}
+
+@keyframes toastIn {
+  from { transform: translateX(-50%) translateY(8px); opacity: 0; }
+  to   { transform: translateX(-50%) translateY(0);   opacity: 1; }
+}
+@keyframes slideUp {
+  from { transform: translateY(8px); opacity: 0; }
+  to   { transform: translateY(0);   opacity: 1; }
+}
+@keyframes socketPulse {
+  0%   { box-shadow: 0 0 0 0 rgba(34,197,94,.6); }
+  100% { box-shadow: 0 0 0 10px rgba(34,197,94,0); }
+}
+
+.animate-toast-in  { animation: toastIn  0.3s ease forwards; }
+.animate-slide-up  { animation: slideUp  0.25s ease forwards; }
+.animate-socket    { animation: socketPulse 2s ease-out infinite; }

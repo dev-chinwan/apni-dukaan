@@ -1,0 +1,496 @@
+/**
+ * ╔══════════════════════════════════════════════════════════╗
+ * ║          FRESHCART — PRODUCT CONFIGURATION               ║
+ * ║  Edit this file to add, remove or update products.       ║
+ * ║  Changes reflect immediately — no DB, no migration.      ║
+ * ╚══════════════════════════════════════════════════════════╝
+ *
+ *  FIELD GUIDE
+ *  ───────────
+ *  id       : unique string, never change once orders exist
+ *  name     : display name shown to customers
+ *  emoji    : single emoji shown on product card and order receipts
+ *  price    : price in ₹ (integer)
+ *  unit     : "kg" | "dozen" | "piece" | "litre" | "pack" | "g" | etc.
+ *  category : must match one entry in CATEGORIES below
+ *  badge    : short label shown on card  — null to hide
+ *  inStock  : true | false  — false hides the product from customers
+ *  sortOrder: lower number = shown first within category
+ */
+
+// ── Categories ────────────────────────────────────────────────────────────────
+// Add or rename freely. "All" is auto-prepended by the shop UI.
+export const CATEGORIES = [
+  'Fruits',
+  'Vegetables',
+  'Dairy & Eggs',
+  'Bakery',
+  'Beverages',
+  'Snacks',
+  'Staples',
+  'Personal Care',
+];
+
+// ── Products ──────────────────────────────────────────────────────────────────
+export const PRODUCTS = [
+  // ── FRUITS ──────────────────────────────────────────────────────────────────
+  {
+    id: 'fruit-001',
+    name: 'Alphonso Mangoes',
+    emoji: '🥭',
+    price: 249,
+    unit: 'dozen',
+    category: 'Fruits',
+    badge: 'Seasonal',
+    inStock: true,
+    sortOrder: 1,
+  },
+  {
+    id: 'fruit-002',
+    name: 'Organic Bananas',
+    emoji: '🍌',
+    price: 49,
+    unit: 'dozen',
+    category: 'Fruits',
+    badge: null,
+    inStock: true,
+    sortOrder: 2,
+  },
+  {
+    id: 'fruit-003',
+    name: 'Watermelon',
+    emoji: '🍉',
+    price: 89,
+    unit: 'piece',
+    category: 'Fruits',
+    badge: 'Fresh',
+    inStock: true,
+    sortOrder: 3,
+  },
+  {
+    id: 'fruit-004',
+    name: 'Red Apples',
+    emoji: '🍎',
+    price: 159,
+    unit: 'kg',
+    category: 'Fruits',
+    badge: null,
+    inStock: true,
+    sortOrder: 4,
+  },
+  {
+    id: 'fruit-005',
+    name: 'Pomegranate',
+    emoji: '🍑',
+    price: 129,
+    unit: 'kg',
+    category: 'Fruits',
+    badge: null,
+    inStock: true,
+    sortOrder: 5,
+  },
+  {
+    id: 'fruit-006',
+    name: 'Green Grapes',
+    emoji: '🍇',
+    price: 99,
+    unit: 'kg',
+    category: 'Fruits',
+    badge: null,
+    inStock: true,
+    sortOrder: 6,
+  },
+
+  // ── VEGETABLES ───────────────────────────────────────────────────────────────
+  {
+    id: 'veg-001',
+    name: 'Tomatoes',
+    emoji: '🍅',
+    price: 39,
+    unit: 'kg',
+    category: 'Vegetables',
+    badge: null,
+    inStock: true,
+    sortOrder: 1,
+  },
+  {
+    id: 'veg-002',
+    name: 'Onions',
+    emoji: '🧅',
+    price: 35,
+    unit: 'kg',
+    category: 'Vegetables',
+    badge: null,
+    inStock: true,
+    sortOrder: 2,
+  },
+  {
+    id: 'veg-003',
+    name: 'Spinach',
+    emoji: '🥬',
+    price: 29,
+    unit: 'bunch',
+    category: 'Vegetables',
+    badge: 'Organic',
+    inStock: true,
+    sortOrder: 3,
+  },
+  {
+    id: 'veg-004',
+    name: 'Bell Peppers (Mix)',
+    emoji: '🫑',
+    price: 79,
+    unit: 'pack',
+    category: 'Vegetables',
+    badge: 'Colorful',
+    inStock: true,
+    sortOrder: 4,
+  },
+  {
+    id: 'veg-005',
+    name: 'Broccoli',
+    emoji: '🥦',
+    price: 69,
+    unit: 'piece',
+    category: 'Vegetables',
+    badge: 'Organic',
+    inStock: true,
+    sortOrder: 5,
+  },
+  {
+    id: 'veg-006',
+    name: 'Carrots',
+    emoji: '🥕',
+    price: 45,
+    unit: 'kg',
+    category: 'Vegetables',
+    badge: null,
+    inStock: true,
+    sortOrder: 6,
+  },
+  {
+    id: 'veg-007',
+    name: 'Potatoes',
+    emoji: '🥔',
+    price: 30,
+    unit: 'kg',
+    category: 'Vegetables',
+    badge: null,
+    inStock: true,
+    sortOrder: 7,
+  },
+  {
+    id: 'veg-008',
+    name: 'Cauliflower',
+    emoji: '🥦',
+    price: 55,
+    unit: 'piece',
+    category: 'Vegetables',
+    badge: null,
+    inStock: false,  // ← set false to hide from customers
+    sortOrder: 8,
+  },
+
+  // ── DAIRY & EGGS ─────────────────────────────────────────────────────────────
+  {
+    id: 'dairy-001',
+    name: 'Full Cream Milk',
+    emoji: '🥛',
+    price: 68,
+    unit: 'litre',
+    category: 'Dairy & Eggs',
+    badge: null,
+    inStock: true,
+    sortOrder: 1,
+  },
+  {
+    id: 'dairy-002',
+    name: 'Fresh Paneer',
+    emoji: '🧀',
+    price: 89,
+    unit: '200g',
+    category: 'Dairy & Eggs',
+    badge: 'Fresh',
+    inStock: true,
+    sortOrder: 2,
+  },
+  {
+    id: 'dairy-003',
+    name: 'Dahi (Curd)',
+    emoji: '🫙',
+    price: 45,
+    unit: '400g',
+    category: 'Dairy & Eggs',
+    badge: null,
+    inStock: true,
+    sortOrder: 3,
+  },
+  {
+    id: 'dairy-004',
+    name: 'Amul Butter',
+    emoji: '🧈',
+    price: 55,
+    unit: '100g',
+    category: 'Dairy & Eggs',
+    badge: null,
+    inStock: true,
+    sortOrder: 4,
+  },
+  {
+    id: 'dairy-005',
+    name: 'Farm Eggs',
+    emoji: '🥚',
+    price: 79,
+    unit: '12 pcs',
+    category: 'Dairy & Eggs',
+    badge: 'Farm Fresh',
+    inStock: true,
+    sortOrder: 5,
+  },
+  {
+    id: 'dairy-006',
+    name: 'Cheese Slices',
+    emoji: '🧀',
+    price: 149,
+    unit: '200g',
+    category: 'Dairy & Eggs',
+    badge: null,
+    inStock: true,
+    sortOrder: 6,
+  },
+
+  // ── BAKERY ────────────────────────────────────────────────────────────────────
+  {
+    id: 'bake-001',
+    name: 'Whole Wheat Bread',
+    emoji: '🍞',
+    price: 45,
+    unit: 'loaf',
+    category: 'Bakery',
+    badge: null,
+    inStock: true,
+    sortOrder: 1,
+  },
+  {
+    id: 'bake-002',
+    name: 'Butter Croissants',
+    emoji: '🥐',
+    price: 65,
+    unit: 'pack of 4',
+    category: 'Bakery',
+    badge: 'Artisan',
+    inStock: true,
+    sortOrder: 2,
+  },
+  {
+    id: 'bake-003',
+    name: 'Multigrain Buns',
+    emoji: '🫓',
+    price: 49,
+    unit: 'pack of 6',
+    category: 'Bakery',
+    badge: null,
+    inStock: true,
+    sortOrder: 3,
+  },
+
+  // ── BEVERAGES ─────────────────────────────────────────────────────────────────
+  {
+    id: 'bev-001',
+    name: 'Coconut Water',
+    emoji: '🥥',
+    price: 35,
+    unit: 'can',
+    category: 'Beverages',
+    badge: 'Natural',
+    inStock: true,
+    sortOrder: 1,
+  },
+  {
+    id: 'bev-002',
+    name: 'Fresh Orange Juice',
+    emoji: '🍊',
+    price: 99,
+    unit: 'litre',
+    category: 'Beverages',
+    badge: null,
+    inStock: true,
+    sortOrder: 2,
+  },
+  {
+    id: 'bev-003',
+    name: 'Green Tea',
+    emoji: '🍵',
+    price: 129,
+    unit: '25 bags',
+    category: 'Beverages',
+    badge: 'Organic',
+    inStock: true,
+    sortOrder: 3,
+  },
+  {
+    id: 'bev-004',
+    name: 'Cold Brew Coffee',
+    emoji: '☕',
+    price: 179,
+    unit: '250ml',
+    category: 'Beverages',
+    badge: 'New',
+    inStock: true,
+    sortOrder: 4,
+  },
+
+  // ── SNACKS ────────────────────────────────────────────────────────────────────
+  {
+    id: 'snack-001',
+    name: 'Roasted Almonds',
+    emoji: '🥜',
+    price: 149,
+    unit: '250g',
+    category: 'Snacks',
+    badge: null,
+    inStock: true,
+    sortOrder: 1,
+  },
+  {
+    id: 'snack-002',
+    name: 'Multigrain Chips',
+    emoji: '🫙',
+    price: 39,
+    unit: 'pack',
+    category: 'Snacks',
+    badge: 'Baked',
+    inStock: true,
+    sortOrder: 2,
+  },
+  {
+    id: 'snack-003',
+    name: 'Dark Chocolate',
+    emoji: '🍫',
+    price: 99,
+    unit: '80g bar',
+    category: 'Snacks',
+    badge: '70% Cocoa',
+    inStock: true,
+    sortOrder: 3,
+  },
+  {
+    id: 'snack-004',
+    name: 'Trail Mix',
+    emoji: '🫙',
+    price: 129,
+    unit: '200g',
+    category: 'Snacks',
+    badge: null,
+    inStock: true,
+    sortOrder: 4,
+  },
+
+  // ── STAPLES ───────────────────────────────────────────────────────────────────
+  {
+    id: 'staple-001',
+    name: 'Basmati Rice',
+    emoji: '🍚',
+    price: 189,
+    unit: 'kg',
+    category: 'Staples',
+    badge: 'Premium',
+    inStock: true,
+    sortOrder: 1,
+  },
+  {
+    id: 'staple-002',
+    name: 'Toor Dal',
+    emoji: '🫘',
+    price: 149,
+    unit: 'kg',
+    category: 'Staples',
+    badge: null,
+    inStock: true,
+    sortOrder: 2,
+  },
+  {
+    id: 'staple-003',
+    name: 'Sunflower Oil',
+    emoji: '🫙',
+    price: 179,
+    unit: 'litre',
+    category: 'Staples',
+    badge: null,
+    inStock: true,
+    sortOrder: 3,
+  },
+  {
+    id: 'staple-004',
+    name: 'Wheat Flour (Atta)',
+    emoji: '🌾',
+    price: 55,
+    unit: 'kg',
+    category: 'Staples',
+    badge: null,
+    inStock: true,
+    sortOrder: 4,
+  },
+  {
+    id: 'staple-005',
+    name: 'Sugar',
+    emoji: '🍬',
+    price: 45,
+    unit: 'kg',
+    category: 'Staples',
+    badge: null,
+    inStock: true,
+    sortOrder: 5,
+  },
+
+  // ── PERSONAL CARE ─────────────────────────────────────────────────────────────
+  {
+    id: 'care-001',
+    name: 'Dove Soap (3-pack)',
+    emoji: '🧼',
+    price: 129,
+    unit: 'pack',
+    category: 'Personal Care',
+    badge: null,
+    inStock: true,
+    sortOrder: 1,
+  },
+  {
+    id: 'care-002',
+    name: 'Colgate Toothpaste',
+    emoji: '🪥',
+    price: 89,
+    unit: '200g',
+    category: 'Personal Care',
+    badge: null,
+    inStock: true,
+    sortOrder: 2,
+  },
+];
+
+// ── Order Status Flow ─────────────────────────────────────────────────────────
+// Admin moves orders through these steps in sequence.
+export const STATUS_STEPS = [
+  { key: 'placed',    label: 'Order Placed',      icon: '📋', color: '#F59E0B' },
+  { key: 'confirmed', label: 'Confirmed',          icon: '✅', color: '#3B82F6' },
+  { key: 'packing',   label: 'Being Packed',       icon: '📦', color: '#8B5CF6' },
+  { key: 'out',       label: 'Out for Delivery',   icon: '🛵', color: '#F97316' },
+  { key: 'delivered', label: 'Delivered',           icon: '🏠', color: '#22C55E' },
+];
+
+// Allowed next status for each current status
+export const STATUS_TRANSITIONS = {
+  placed:    ['confirmed', 'cancelled'],
+  confirmed: ['packing',   'cancelled'],
+  packing:   ['out'],
+  out:       ['delivered'],
+  delivered: [],
+  cancelled: [],
+};
+
+// ── Delivery Config ───────────────────────────────────────────────────────────
+export const DELIVERY = {
+  freeAbove: 499,       // ₹ — free delivery if cart >= this
+  fee:       39,        // ₹ — delivery fee when below threshold
+  minOrder:  99,        // ₹ — minimum order value
+};

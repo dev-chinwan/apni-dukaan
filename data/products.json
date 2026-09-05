@@ -1,0 +1,103 @@
+{
+  "products": [
+    {
+      "id": "7f3c2a91-6d84-4b17-a5e2-91c8f04d7b36",
+      "name": "Organic Bananas",
+      "emoji": "🍌",
+      "price": 49,
+      "unit": "dozen",
+      "category": "Fruits",
+      "badge": "Fresh",
+      "inStock": true,
+      "sortOrder": 2
+    },
+    {
+      "id": "c18e5f42-9a73-4d06-b8c1-27f94e6a0d53",
+      "name": "Tomatoes",
+      "emoji": "🍅",
+      "price": 39,
+      "unit": "kg",
+      "category": "Vegetables",
+      "badge": "Fresh",
+      "inStock": true,
+      "sortOrder": 3
+    },
+    {
+      "id": "e6049b7d-32af-48c5-91de-7a2f6c08b143",
+      "name": "Onions",
+      "emoji": "🧅",
+      "price": 35,
+      "unit": "kg",
+      "category": "Vegetables",
+      "badge": "Fresh",
+      "inStock": true,
+      "sortOrder": 4
+    },
+    {
+      "id": "4a9d71e6-f208-43bc-86d5-1c7e0b92fa64",
+      "name": "Full Cream Milk",
+      "emoji": "🥛",
+      "price": 68,
+      "unit": "litre",
+      "category": "Dairy & Eggs",
+      "badge": "Fresh",
+      "inStock": true,
+      "sortOrder": 5
+    },
+    {
+      "id": "b27f0c5e-6149-4a83-9de2-58c1f706ab39",
+      "name": "Farm Eggs",
+      "emoji": "🥚",
+      "price": 79,
+      "unit": "12 pcs",
+      "category": "Dairy & Eggs",
+      "badge": "Farm Fresh",
+      "inStock": true,
+      "sortOrder": 6
+    },
+    {
+      "id": "9e52c8a4-7b16-46d0-a3f9-2c81e5b6740d",
+      "name": "Whole Wheat Bread",
+      "emoji": "🍞",
+      "price": 45,
+      "unit": "loaf",
+      "category": "Bakery",
+      "badge": "Fresh",
+      "inStock": true,
+      "sortOrder": 7
+    },
+    {
+      "id": "d0437f8b-5e29-4c61-b9a7-16f2e80d3c54",
+      "name": "Coconut Water",
+      "emoji": "🥥",
+      "price": 35,
+      "unit": "can",
+      "category": "Beverages",
+      "badge": "Natural",
+      "inStock": true,
+      "sortOrder": 8
+    },
+    {
+      "id": "6b91e4f0-c327-4d58-82a6-0f7c35b9e142",
+      "name": "Potato Chips",
+      "emoji": "🥔",
+      "price": 20,
+      "unit": "pack",
+      "category": "Snacks",
+      "badge": "Fresh",
+      "inStock": true,
+      "sortOrder": 9
+    },
+    {
+      "id": "f85a2d39-0c74-41e6-b592-3d8f17ca604b",
+      "name": "Basmati Rice",
+      "emoji": "🍚",
+      "price": 119,
+      "unit": "kg",
+      "category": "Staples",
+      "badge": "Fresh",
+      "inStock": true,
+      "sortOrder": 10
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+[
+  {
+    "id": "28cd2cd6-028b-4561-90e7-54ba0ccd56eb",
+    "name": "Pradeep",
+    "mobile": "9108393405",
+    "role": "customer",
+    "createdAt": "2026-09-05T14:33:45.545Z"
+  },
+  {
+    "id": "995f97fa-4a23-4377-98ee-e4b6b8101e80",
+    "name": "Ravi",
+    "mobile": "9999999999",
+    "role": "admin",
+    "createdAt": "2026-09-05T14:35:35.417Z"
+  }
+]
