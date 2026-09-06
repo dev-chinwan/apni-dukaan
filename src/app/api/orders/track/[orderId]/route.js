@@ -6,7 +6,11 @@ export async function GET(req, { params }) {
   const user = await getCurrentUser(req);
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-  const order = await Orders.findById(params.orderId);
+  const routeParams = await params;
+  const orderId = routeParams?.orderId;
+  if (!orderId) return NextResponse.json({ error: 'Order ID is required' }, { status: 400 });
+
+  const order = await Orders.findById(orderId);
   if (!order)  return NextResponse.json({ error: 'Order not found' }, { status: 404 });
 
   // Customer can only see own orders; admin can see all

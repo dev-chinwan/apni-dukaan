@@ -8,15 +8,19 @@ export async function PATCH(req, { params }) {
   if (!user || user.role !== 'admin')
     return NextResponse.json({ error: 'Admin only' }, { status: 403 });
 
+  const routeParams = await params;
+  const orderId = routeParams?.orderId;
+  if (!orderId) return NextResponse.json({ error: 'Order ID is required' }, { status: 400 });
+
   const { status, adminNote } = await req.json();
-  const order = await Orders.findById(params.orderId);
+  const order = await Orders.findById(orderId);
   if (!order) return NextResponse.json({ error: 'Order not found' }, { status: 404 });
 
   const allowed = STATUS_TRANSITIONS[order.status] || [];
   if (!allowed.includes(status))
     return NextResponse.json({ error: `Cannot move from "${order.status}" to "${status}"` }, { status: 400 });
 
-  const updated = await Orders.updateStatus(params.orderId, status, adminNote || '');
+  const updated = await Orders.updateStatus(orderId, status, adminNote || '');
 
   // 🔌 Notify the specific customer
   const io = global._freshcartIO;

@@ -50,8 +50,8 @@ function LoginContent() {
 
         <form onSubmit={submit} className="space-y-3">
           <div>
-            <label className="text-[10px] uppercase tracking-widest text-[#4B7A5B] mb-1 block">Full Name</label>
-            <input value={form.name} onChange={set('name')} placeholder="Ravi Kumar" className="input" required />
+            <label className="text-[10px] uppercase tracking-widest text-[#4B7A5B] mb-1 block">Full Name (first time only)</label>
+            <input value={form.name} onChange={set('name')} placeholder="Ravi Kumar" className="input" />
           </div>
 
           <div>
@@ -94,7 +94,7 @@ function LoginContent() {
           </div>
         )} */}
 
-        <p className="text-center text-[#2D5A3F] text-xs mt-6">Your mobile number is your unique login ID.</p>
+        <p className="text-center text-[#2D5A3F] text-xs mt-6">Your mobile number is your unique login ID. Existing users can continue with mobile only.</p>
       </div>
     </div>
   );

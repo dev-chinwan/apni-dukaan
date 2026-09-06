@@ -1,25 +1,52 @@
 import { join } from 'path';
 import { existsSync, mkdirSync } from 'fs';
+import { readFile, writeFile } from 'fs/promises';
 import { randomUUID } from 'crypto';
 import { PRODUCTS, DELIVERY } from '@/config/products.config';
+import { hydrateObjectFromCloud, syncObjectToCloud, isCloudinarySyncRequired } from '@/lib/cloudinaryStore';
 
 const DATA_DIR = join(process.cwd(), 'data');
 if (!existsSync(DATA_DIR)) mkdirSync(DATA_DIR, { recursive: true });
 
 let _catalogDb;
 let _settingsDb;
+let _writeLocks = {};
+
+async function withFileWriteLock(filename, writer) {
+  const previous = _writeLocks[filename] || Promise.resolve();
+  const current = previous.catch(() => {}).then(writer);
+  _writeLocks[filename] = current.finally(() => {
+    if (_writeLocks[filename] === current) delete _writeLocks[filename];
+  });
+  return current;
+}
 
 async function getObjectDb(filename, defaults) {
-  const { Low } = await import('lowdb');
-  const { JSONFile } = await import('lowdb/node');
-
   const file = join(DATA_DIR, filename);
-  const adapter = new JSONFile(file);
-  const db = new Low(adapter, defaults);
+  const db = {
+    data: { ...defaults },
+    async write() {
+      await writeFile(file, JSON.stringify(this.data, null, 2), 'utf8');
+    },
+  };
 
-  await db.read();
-  if (!db.data) db.data = { ...defaults };
-  await db.write();
+  let changed = false;
+  try {
+    const raw = await readFile(file, 'utf8');
+    const parsed = JSON.parse(raw);
+    if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+      db.data = parsed;
+    }
+  } catch {
+    db.data = { ...defaults };
+    changed = !existsSync(file);
+  }
+
+  if (changed) {
+    await withFileWriteLock(filename, async () => {
+      await db.write();
+    });
+  }
   return db;
 }
 
@@ -27,9 +54,17 @@ async function getCatalogDb() {
   if (_catalogDb) return _catalogDb;
   _catalogDb = await getObjectDb('products.json', { products: [] });
 
+  const cloudData = await hydrateObjectFromCloud('products.json', _catalogDb.data);
+  if (cloudData && Array.isArray(cloudData.products)) {
+    _catalogDb.data = cloudData;
+  }
+
   if (!Array.isArray(_catalogDb.data.products) || _catalogDb.data.products.length === 0) {
     _catalogDb.data.products = PRODUCTS.map((p) => ({ ...p }));
-    await _catalogDb.write();
+    await withFileWriteLock('products.json', async () => {
+      await _catalogDb.write();
+    });
+    await syncObjectToCloud('products.json', _catalogDb.data);
   }
 
   return _catalogDb;
@@ -44,7 +79,26 @@ async function getSettingsDb() {
     supportMobile: '',
   });
 
+  const cloudData = await hydrateObjectFromCloud('settings.json', _settingsDb.data);
+  if (cloudData && typeof cloudData === 'object' && !Array.isArray(cloudData)) {
+    const next = JSON.stringify(cloudData);
+    const curr = JSON.stringify(_settingsDb.data || {});
+    if (next !== curr) {
+      _settingsDb.data = cloudData;
+    }
+  }
+
   return _settingsDb;
+}
+
+async function persistObjectDb(filename, db) {
+  const result = await withFileWriteLock(filename, async () => {
+    await db.write();
+    return syncObjectToCloud(filename, db.data);
+  });
+  if (isCloudinarySyncRequired() && !result.ok && !result.skipped) {
+    throw new Error(`Cloudinary sync failed for ${filename}`);
+  }
 }
 
 function normalizeProduct(product) {
@@ -107,7 +161,7 @@ export const Catalog = {
 
     db.data.products[idx] = merged;
 
-    await db.write();
+    await persistObjectDb('products.json', db);
     return db.data.products[idx];
   },
 
@@ -123,7 +177,7 @@ export const Catalog = {
     }
 
     db.data.products.push(product);
-    await db.write();
+    await persistObjectDb('products.json', db);
     return product;
   },
 
@@ -133,7 +187,7 @@ export const Catalog = {
     if (idx === -1) return null;
 
     const [deleted] = db.data.products.splice(idx, 1);
-    await db.write();
+    await persistObjectDb('products.json', db);
     return deleted;
   },
 
@@ -152,13 +206,25 @@ export const Catalog = {
 
     const db = await getCatalogDb();
     db.data.products = normalized;
-    await db.write();
+    await persistObjectDb('products.json', db);
     return this.listAll();
   },
 
   async categories(includeOutOfStock = false) {
     const products = includeOutOfStock ? await this.listAll() : await this.listInStock();
     return [...new Set(products.map((p) => p.category))];
+  },
+
+  async getRawData() {
+    const db = await getCatalogDb();
+    return {
+      products: Array.isArray(db.data.products) ? [...db.data.products] : [],
+    };
+  },
+
+  async replaceRawData(data) {
+    const products = Array.isArray(data?.products) ? data.products : [];
+    return this.replaceAll(products);
   },
 };
 
@@ -188,7 +254,29 @@ export const AppSettings = {
       deliveryFee: Number(updates.deliveryFee ?? db.data.deliveryFee ?? 0),
       freeDeliveryAbove: Number(updates.freeDeliveryAbove ?? db.data.freeDeliveryAbove ?? 0),
     };
-    await db.write();
+    await persistObjectDb('settings.json', db);
+    return this.get();
+  },
+
+  async getRawData() {
+    const db = await getSettingsDb();
+    return {
+      deliveryFee: Number(db.data.deliveryFee || 0),
+      freeDeliveryAbove: Number(db.data.freeDeliveryAbove || 0),
+      currency: db.data.currency || 'INR',
+      supportMobile: db.data.supportMobile || '',
+    };
+  },
+
+  async replaceRawData(settings) {
+    const db = await getSettingsDb();
+    db.data = {
+      deliveryFee: Number(settings?.deliveryFee || 0),
+      freeDeliveryAbove: Number(settings?.freeDeliveryAbove || 0),
+      currency: settings?.currency || 'INR',
+      supportMobile: settings?.supportMobile || '',
+    };
+    await persistObjectDb('settings.json', db);
     return this.get();
   },
 };

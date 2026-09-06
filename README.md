@@ -21,6 +21,12 @@ npm install
 JWT_SECRET=your_long_random_secret_here
 PORT=3000
 NEXT_PUBLIC_APP_URL=http://localhost:3000
+CLOUDINARY_SYNC_ENABLED=false
+CLOUDINARY_SYNC_REQUIRED=false
+CLOUDINARY_CLOUD_NAME=
+CLOUDINARY_API_KEY=
+CLOUDINARY_API_SECRET=
+CLOUDINARY_FOLDER=freshcart-data
 ```
 
 Generate a strong JWT secret:
@@ -86,6 +92,19 @@ All app data is stored in data folder:
 - data/products.json
 - data/settings.json
 
+Optional Cloudinary JSON sync:
+- Set CLOUDINARY_SYNC_ENABLED=true and provide Cloudinary credentials.
+- Set CLOUDINARY_SYNC_REQUIRED=true if you want writes to fail whenever Cloudinary upload fails (strict cloud-first mode).
+- The app hydrates JSON from Cloudinary on server startup and still keeps local JSON files as backup cache.
+- Every write to users/orders/products/settings updates local JSON and uploads updated JSON to Cloudinary raw assets.
+- If Cloudinary is unavailable, app continues with local JSON files.
+
+Admin Cloudinary management:
+- Open Admin Dashboard and use the Cloudinary Backup card.
+- Push Local to Cloud uploads users/orders/products/settings JSON immediately.
+- Pull Cloud to Local downloads cloud JSON and restores local backup files + UI data source.
+- Use Admin -> Cloud Data for full bundle pull/edit/bulk-save of users, orders, products, and settings JSON.
+
 Backup strategy:
 - Copy the full data folder regularly
 
@@ -128,6 +147,11 @@ Why this path is reliable:
 - NEXT_PUBLIC_APP_URL = your Railway public URL
 - NODE_ENV = production
 - PORT = 3000
+
+Socket.IO on Railway notes:
+- Set NEXT_PUBLIC_APP_URL exactly to your deployed HTTPS URL (no trailing slash).
+- Railway also provides RAILWAY_PUBLIC_DOMAIN / RAILWAY_STATIC_URL; server uses these automatically for Socket.IO origin allowlist.
+- Keep start command as npm start (this runs custom server.js required for Socket.IO).
 6. Build command:
 
 ```bash
@@ -192,7 +216,7 @@ npm start
 ```text
 server.js                custom Node server with Socket.IO
 src/app                  Next.js App Router pages and APIs
-src/lib/db.js            lowdb JSON storage helpers
+src/lib/db.js            JSON file storage helpers
 src/lib/catalog.js       products/settings data layer
 src/middleware.js        auth-based route protection
 data                     JSON data files

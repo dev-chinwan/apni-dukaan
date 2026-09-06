@@ -52,7 +52,7 @@ export default function CartPage() {
       if (!res.ok) throw new Error(data.error);
       clearCart();
       toast.success('🎉 Order placed! Admin notified.');
-      router.push(`/customer/orders/${data.order.orderId}`);
+      router.push('/customer/orders');
     } catch (e) {
       toast.error(e.message || 'Failed to place order');
     } finally { setPlacing(false); }

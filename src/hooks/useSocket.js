@@ -30,6 +30,11 @@ export function useSocket({ role, userId, onNewOrder, onOrderUpdate, onOrderUpda
     socket.on('connect', onConnect);
     if (socket.connected) onConnect();
 
+    const onConnectError = (err) => {
+      console.error('[Socket] connect_error:', err?.message || err);
+    };
+    socket.on('connect_error', onConnectError);
+
     const onNewOrd  = (d) => handlersRef.current.onNewOrder?.(d);
     const onOrdUpd  = (d) => handlersRef.current.onOrderUpdate?.(d);
     const onOrdUpd2 = (d) => handlersRef.current.onOrderUpdated?.(d);
@@ -40,6 +45,7 @@ export function useSocket({ role, userId, onNewOrder, onOrderUpdate, onOrderUpda
 
     return () => {
       socket.off('connect',              onConnect);
+      socket.off('connect_error',        onConnectError);
       socket.off('new_order',            onNewOrd);
       socket.off('order_status_update',  onOrdUpd);
       socket.off('order_updated',        onOrdUpd2);

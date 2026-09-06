@@ -9,6 +9,8 @@ export default function AdminDashboard() {
   const [stats, setStats]   = useState(null);
   const [products, setProducts] = useState([]);
   const [settings, setSettings] = useState(null);
+  const [cloudStatus, setCloudStatus] = useState(null);
+  const [cloudBusy, setCloudBusy] = useState(false);
   const [notifs, setNotifs] = useState([]);
   const [activeOrders, setActiveOrders] = useState([]);
   const [pulse, setPulse]   = useState(false);
@@ -46,20 +48,23 @@ export default function AdminDashboard() {
   });
 
   const loadStats = async () => {
-    const [sRes, catalogRes, settingsRes, ordersRes] = await Promise.all([
+    const [sRes, catalogRes, settingsRes, ordersRes, cloudRes] = await Promise.all([
       fetch('/api/admin/stats'),
       fetch('/api/admin/catalog'),
       fetch('/api/admin/settings'),
       fetch('/api/admin/orders?status=all&limit=50'),
+      fetch('/api/admin/cloudinary'),
     ]);
     const { stats: s } = await sRes.json();
     const { products: p } = await catalogRes.json();
     const { settings: set } = await settingsRes.json();
     const { orders } = await ordersRes.json();
+    const cloudData = await cloudRes.json();
 
     setStats(s);
     setProducts(p || []);
     setSettings(set || null);
+    setCloudStatus(cloudData || null);
     const openOrders = (orders || [])
       .filter((o) => !isCompleted(o.status))
       .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
@@ -74,6 +79,25 @@ export default function AdminDashboard() {
         createdAt: o.createdAt,
       }));
     setActiveOrders(openOrders);
+  };
+
+  const runCloudAction = async (action) => {
+    setCloudBusy(true);
+    try {
+      const res = await fetch('/api/admin/cloudinary', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Cloudinary action failed');
+      toast.success(action === 'push' ? 'Saved local data to Cloudinary' : 'Loaded Cloudinary data into app');
+      await loadStats();
+    } catch (e) {
+      toast.error(e.message || 'Cloudinary action failed');
+    } finally {
+      setCloudBusy(false);
+    }
   };
 
   useEffect(() => { loadStats(); }, []);
@@ -92,7 +116,7 @@ export default function AdminDashboard() {
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 style={{ fontFamily: 'Space Grotesk, sans-serif' }} className="text-2xl font-bold text-green-50">Dukaan Dashboard</h1>
+          <h1 style={{ fontFamily: 'Space Grotesk, sans-serif' }} className="text-2xl font-bold text-green-50">FreshCart Dashboard</h1>
           <p className="text-xs text-[#4B7A5B] mt-0.5">Local freshness, delivered with trust.</p>
           <p className="text-sm text-[#4B7A5B] mt-1">
             {new Date().toLocaleDateString('en-IN', { weekday:'long', day:'numeric', month:'long' })}
@@ -103,7 +127,7 @@ export default function AdminDashboard() {
           pulse ? 'bg-leaf-500/20 border-leaf-500/50 text-leaf-400' : 'bg-[#0A2318] border-[#1A3D2B] text-[#4B7A5B]'
         }`}>
           <span className={`w-2 h-2 rounded-full ${pulse ? 'bg-leaf-500 animate-pulse' : 'bg-leaf-500'}`} style={{ animation: 'socketPulse 2s ease-out infinite' }} />
-          {pulse ? 'New order!' : 'Dukaan Live'}
+          {pulse ? 'New order!' : 'FreshCart Live'}
         </div>
       </div>
 
@@ -174,6 +198,59 @@ export default function AdminDashboard() {
           {settings?.supportMobile && (
             <div className="text-xs text-[#4B7A5B] mt-3">Support: +91 {settings.supportMobile}</div>
           )}
+        </div>
+      </div>
+
+      <div className="card p-4 mb-6">
+        <div className="flex items-center justify-between mb-2">
+          <h2 className="text-xs uppercase tracking-widest text-[#4B7A5B]">Cloudinary Backup</h2>
+          <div className="flex items-center gap-2">
+            <Link href="/admin/cloud" className="text-xs text-amber-400">Bulk Manage →</Link>
+            <span className={`text-xs px-2 py-1 rounded-full border ${
+              cloudStatus?.cloudinaryEnabled
+                ? 'text-leaf-400 border-leaf-500/30 bg-leaf-500/10'
+                : 'text-red-300 border-red-500/30 bg-red-500/10'
+            }`}>
+              {cloudStatus?.cloudinaryEnabled ? 'Connected' : 'Disabled'}
+            </span>
+          </div>
+        </div>
+
+        <div className="text-sm text-green-100">
+          Users: <span className="text-leaf-400 font-bold">{cloudStatus?.counts?.users ?? '--'}</span>
+          {' '}· Orders: <span className="text-leaf-400 font-bold">{cloudStatus?.counts?.orders ?? '--'}</span>
+          {' '}· Products: <span className="text-leaf-400 font-bold">{cloudStatus?.counts?.products ?? '--'}</span>
+        </div>
+
+        <p className="text-xs text-[#4B7A5B] mt-2">Use push to save latest app data to Cloudinary. Use pull to restore cloud JSON into local backup files and UI.</p>
+
+        <div className="flex flex-wrap gap-2 mt-3">
+          <button
+            type="button"
+            disabled={cloudBusy || !cloudStatus?.cloudinaryEnabled}
+            onClick={() => runCloudAction('push')}
+            className="px-3 py-2 rounded-lg text-xs font-semibold bg-amber-500/20 text-amber-400 border border-amber-500/40 disabled:opacity-50"
+          >
+            {cloudBusy ? 'Working...' : 'Push Local to Cloud'}
+          </button>
+
+          <button
+            type="button"
+            disabled={cloudBusy || !cloudStatus?.cloudinaryEnabled}
+            onClick={() => runCloudAction('pull')}
+            className="px-3 py-2 rounded-lg text-xs font-semibold bg-[#0D2B1F] text-green-100 border border-[#1A3D2B] disabled:opacity-50"
+          >
+            {cloudBusy ? 'Working...' : 'Pull Cloud to Local'}
+          </button>
+
+          <button
+            type="button"
+            disabled={cloudBusy}
+            onClick={loadStats}
+            className="px-3 py-2 rounded-lg text-xs font-semibold text-[#4B7A5B] border border-[#1A3D2B] disabled:opacity-50"
+          >
+            Refresh Status
+          </button>
         </div>
       </div>
 

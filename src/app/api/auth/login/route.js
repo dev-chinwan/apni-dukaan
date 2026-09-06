@@ -7,13 +7,15 @@ export async function POST(req) {
   try {
     const { name, mobile, adminMode } = await req.json();
 
-    if (!name?.trim() || !mobile)
-      return NextResponse.json({ error: 'Name and mobile are required' }, { status: 400 });
+    if (!mobile)
+      return NextResponse.json({ error: 'Mobile is required' }, { status: 400 });
 
     if (!/^[6-9]\d{9}$/.test(mobile))
       return NextResponse.json({ error: 'Enter a valid 10-digit mobile number' }, { status: 400 });
 
     let user = await Users.findByMobile(mobile);
+    const cleanName = String(name || '').trim();
+    const nowIso = new Date().toISOString();
 
     if (adminMode) {
       if (user && user.role !== 'admin') {
@@ -21,25 +23,37 @@ export async function POST(req) {
       }
 
       if (!user) {
+        if (!cleanName) {
+          return NextResponse.json({ error: 'Name is required for first-time login' }, { status: 400 });
+        }
         user = await Users.create({
           id: randomUUID(),
-          name: name.trim(),
+          name: cleanName,
           mobile,
           role: 'admin',
+          lastLoginAt: nowIso,
         });
-      } else if (user.name !== name.trim()) {
-        user = await Users.update(user.id, { name: name.trim() });
+      } else {
+        const updates = { lastLoginAt: nowIso };
+        if (cleanName && user.name !== cleanName) updates.name = cleanName;
+        user = await Users.update(user.id, updates);
       }
     } else {
       if (!user) {
+        if (!cleanName) {
+          return NextResponse.json({ error: 'Name is required for first-time login' }, { status: 400 });
+        }
         user = await Users.create({
           id: randomUUID(),
-          name: name.trim(),
+          name: cleanName,
           mobile,
           role: 'customer',
+          lastLoginAt: nowIso,
         });
-      } else if (user.role === 'customer' && user.name !== name.trim()) {
-        user = await Users.update(user.id, { name: name.trim() });
+      } else if (user.role === 'customer') {
+        const updates = { lastLoginAt: nowIso };
+        if (cleanName && user.name !== cleanName) updates.name = cleanName;
+        user = await Users.update(user.id, updates);
       }
     }
 

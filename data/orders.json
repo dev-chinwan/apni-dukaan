@@ -1,1 +1,38 @@
-[]
+[
+  {
+    "orderId": "GRO-O6Q1-68",
+    "customerId": "80d17a86-ccc7-4193-b86e-6987eb044997",
+    "customerName": "Pradeep",
+    "customerMobile": "9108393405",
+    "items": [
+      {
+        "id": "7f3c2a91-6d84-4b17-a5e2-91c8f04d7b36",
+        "name": "Organic Bananas",
+        "emoji": "🍌",
+        "price": 49,
+        "unit": "dozen",
+        "quantity": 1
+      }
+    ],
+    "subtotal": 49,
+    "deliveryFee": 0,
+    "total": 49,
+    "status": "confirmed",
+    "deliveryAddress": "",
+    "notes": "",
+    "adminNote": "",
+    "createdAt": "2026-09-06T11:39:10.730Z",
+    "statusHistory": [
+      {
+        "status": "placed",
+        "ts": "2026-09-06T11:39:10.730Z"
+      },
+      {
+        "status": "confirmed",
+        "ts": "2026-09-06T11:40:11.360Z",
+        "note": ""
+      }
+    ],
+    "updatedAt": "2026-09-06T11:40:11.360Z"
+  }
+]

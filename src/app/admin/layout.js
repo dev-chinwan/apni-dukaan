@@ -9,6 +9,7 @@ const NAV = [
   { href: '/admin/orders',    icon: '📋', label: 'Orders' },
   { href: '/admin/customers', icon: '👥', label: 'Customers' },
   { href: '/admin/groceries', icon: '🥦', label: 'Groceries' },
+  { href: '/admin/cloud',     icon: '☁️', label: 'Cloud Data' },
   { href: '/admin/settings',  icon: '⚙️', label: 'Settings' },
 ];
 
@@ -25,7 +26,7 @@ export default function AdminLayout({ children }) {
             <span className="text-2xl">🥦</span>
             <div>
               <div className="flex items-center gap-2">
-                <span style={{ fontFamily: 'Space Grotesk, sans-serif' }} className="font-bold text-green-50">Dukaan</span>
+                <span style={{ fontFamily: 'Space Grotesk, sans-serif' }} className="font-bold text-green-50">FreshCart</span>
                 <span className="text-xs bg-amber-500/20 text-amber-400 border border-amber-500/30 px-2 py-0.5 rounded-full">Admin</span>
               </div>
               <p className="hidden sm:block text-[10px] text-[#4B7A5B] -mt-0.5">Local freshness, delivered with trust.</p>

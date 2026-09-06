@@ -18,7 +18,6 @@
     "dotenv": "^17.4.2",
     "jose": "^6.2.3",
     "jsonwebtoken": "^9.0.2",
-    "lowdb": "^7.0.1",
     "lucide-react": "^0.468.0",
     "next": "^16.0.0",
     "react": "^19.0.0",

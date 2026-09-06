@@ -1,5 +1,5 @@
 /**
- * File-based database using lowdb + JSON files.
+ * File-based database using plain JSON files.
  *
  * Files stored in /data/
  *   users.json   — registered users (customers & admins)
@@ -12,30 +12,80 @@
 
 import { join } from 'path';
 import { existsSync, mkdirSync } from 'fs';
+import { readFile, writeFile } from 'fs/promises';
+import { hydrateArrayFromCloud, syncArrayToCloud, isCloudinarySyncRequired } from '@/lib/cloudinaryStore';
 
 // ── Ensure /data directory exists ─────────────────────────────────────────────
 const DATA_DIR = join(process.cwd(), 'data');
 if (!existsSync(DATA_DIR)) mkdirSync(DATA_DIR, { recursive: true });
 
-// ── Lazy-load lowdb (ESM-only package via dynamic import) ─────────────────────
+// ── In-memory adapters backed by JSON files ──────────────────────────────────
 let _db = {};
+let _hydrated = {};
+let _writeLocks = {};
+
+async function withFileWriteLock(filename, writer) {
+  const previous = _writeLocks[filename] || Promise.resolve();
+  const current = previous.catch(() => {}).then(writer);
+  _writeLocks[filename] = current.finally(() => {
+    if (_writeLocks[filename] === current) delete _writeLocks[filename];
+  });
+  return current;
+}
 
 async function getAdapter(filename) {
   if (_db[filename]) return _db[filename];
 
-  const { Low }      = await import('lowdb');
-  const { JSONFile } = await import('lowdb/node');
+  const file = join(DATA_DIR, filename);
+  const db = {
+    data: [],
+    async write() {
+      await writeFile(file, JSON.stringify(this.data, null, 2), 'utf8');
+    },
+  };
 
-  const file    = join(DATA_DIR, filename);
-  const adapter = new JSONFile(file);
-  const db      = new Low(adapter, []);
+  let changed = false;
+  try {
+    const raw = await readFile(file, 'utf8');
+    const parsed = JSON.parse(raw);
+    db.data = Array.isArray(parsed) ? parsed : [];
+  } catch {
+    db.data = [];
+    changed = !existsSync(file);
+  }
 
-  await db.read();
-  if (!db.data) db.data = [];
-  await db.write();
+  // Prefer cloud snapshot when configured; keep local JSON as backup cache.
+  if (!_hydrated[filename]) {
+    const cloudData = await hydrateArrayFromCloud(filename, db.data);
+    if (Array.isArray(cloudData)) {
+      const next = JSON.stringify(cloudData);
+      const curr = JSON.stringify(db.data || []);
+      if (next !== curr) {
+        db.data = cloudData;
+        changed = true;
+      }
+    }
+    _hydrated[filename] = true;
+  }
+
+  if (changed) {
+    await withFileWriteLock(filename, async () => {
+      await db.write();
+    });
+  }
 
   _db[filename] = db;
   return db;
+}
+
+async function persistArrayDb(filename, db) {
+  const result = await withFileWriteLock(filename, async () => {
+    await db.write();
+    return syncArrayToCloud(filename, db.data);
+  });
+  if (isCloudinarySyncRequired() && !result.ok && !result.skipped) {
+    throw new Error(`Cloudinary sync failed for ${filename}`);
+  }
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -61,9 +111,13 @@ export const Users = {
 
   async create(userData) {
     const db = await getAdapter('users.json');
-    const user = { ...userData, createdAt: new Date().toISOString() };
+    const user = {
+      ...userData,
+      createdAt: new Date().toISOString(),
+      lastLoginAt: new Date().toISOString(),
+    };
     db.data.push(user);
-    await db.write();
+    await persistArrayDb('users.json', db);
     return user;
   },
 
@@ -77,13 +131,25 @@ export const Users = {
     const idx = db.data.findIndex((u) => u.id === id);
     if (idx === -1) return null;
     db.data[idx] = { ...db.data[idx], ...updates, updatedAt: new Date().toISOString() };
-    await db.write();
+    await persistArrayDb('users.json', db);
     return db.data[idx];
   },
 
   async count(role = null) {
     const db = await getAdapter('users.json');
     return role ? db.data.filter((u) => u.role === role).length : db.data.length;
+  },
+
+  async getAllRaw() {
+    const db = await getAdapter('users.json');
+    return Array.isArray(db.data) ? [...db.data] : [];
+  },
+
+  async replaceAllRaw(rows) {
+    const db = await getAdapter('users.json');
+    db.data = Array.isArray(rows) ? rows : [];
+    await persistArrayDb('users.json', db);
+    return db.data;
   },
 };
 
@@ -125,6 +191,18 @@ export const Orders = {
     return { rows, total };
   },
 
+  async getAllRaw() {
+    const db = await getAdapter('orders.json');
+    return Array.isArray(db.data) ? [...db.data] : [];
+  },
+
+  async replaceAllRaw(rows) {
+    const db = await getAdapter('orders.json');
+    db.data = Array.isArray(rows) ? rows : [];
+    await persistArrayDb('orders.json', db);
+    return db.data;
+  },
+
   async create(orderData) {
     const db    = await getAdapter('orders.json');
     const order = {
@@ -133,7 +211,7 @@ export const Orders = {
       statusHistory: [{ status: orderData.status, ts: new Date().toISOString() }],
     };
     db.data.push(order);
-    await db.write();
+    await persistArrayDb('orders.json', db);
     return order;
   },
 
@@ -150,7 +228,7 @@ export const Orders = {
       { status, ts: new Date().toISOString(), note: adminNote },
     ];
 
-    await db.write();
+    await persistArrayDb('orders.json', db);
     return db.data[idx];
   },
 
@@ -186,7 +264,7 @@ export const Orders = {
 
     const removed = before - db.data.length;
     if (removed > 0) {
-      await db.write();
+      await persistArrayDb('orders.json', db);
       console.log(`[DB] Purged ${removed} orders older than 3 months`);
     }
     return removed;
